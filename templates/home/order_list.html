@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>order_list</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <link href="/static/css/haiersoft.css" rel="stylesheet" type="text/css" media="screen,print"/>
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css"/>
+    <link href="/static/css/print.css" rel="stylesheet" type="text/css" media="print"/>
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+<!-- 成功模态框（Modal） -->
+<div class="modal fade" id="myModal_succeed" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">导出提示</h4>
+            </div>
+            <form method="post">
+                <div class="modal-body warning_modal">
+                    <p class="succeed_text">
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-primary order_download">打印</a>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+<!-- 警告模态框（Modal） -->
+<div class="modal fade" id="myModal_warning" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">导出提示</h4>
+            </div>
+            <form method="post">
+                <div class="modal-body warning_modal">
+                    <i class="glyphicon glyphicon-warning-sign warning_logo"></i>
+                    <p class="warning_text">
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+<!-- MainForm -->
+<div id="MainForm">
+    <div class="form_boxA">
+        <h2>
+            订货信息列表
+            <div class="h2_btn">
+                <button type="button" class="btn btn-info btn-sm" onclick="btn_refresh()">刷新页面</button>
+                <button type="button" class="btn btn-success btn-sm" onclick="btn_export()">导出订货报表</button>
+            </div>
+        </h2>
+        <table class="table table-striped table-hover" cellpadding="0" cellspacing="0">
+            <tr>
+                <th>序号</th>
+                <th>订货编号</th>
+                <th>零件编号</th>
+                <th>零件名称</th>
+                <th>主要供应商编号</th>
+                <th>次要供应商编号</th>
+                <th>订货数量</th>
+                <th>订货时间</th>
+            </tr>
+            {% for index, order in orders %}
+                {% if order.o_part != None %}
+                    <tr>
+                        <td>{{ index + 1 }}</td>
+                        <td>{{ '%08d' % order.order_id }}</td>
+                        <td>{{ '%08d' % order.part_id }}</td>
+                        <td>{{ order.o_part.part_name }}</td>
+                        <td>{{ '%08d' % (order.o_part.p_supplier_id) }}</td>
+                        <td>{{ '%08d' % (order.o_part.s_supplier_id)  if order.o_part.s_supplier !=None else "无" }}</td>
+                        <td>{{ order.order_num }}</td>
+                        <td>{{ order.order_time }}</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </table>
+        <p class="msg">共找到{{ paginate.total }}条匹配记录</p>
+    </div>
+
+    <ul id="PageNum">
+
+        <li><a href="/home/order_list?page=1">首页</a></li>
+        {% if paginate.has_prev %}
+            <li><a href="/home/order_list?page={{ paginate.prev_num }}">上一页</a></li>
+        {% endif %}
+
+        {% for p  in paginate.iter_pages() %}
+            <li>
+                {% if p %}
+                    {% if p != paginate.page %}
+                        <a href="/home/order_list?page={{ p }}">{{ p }}</a>
+                    {% else %}
+                        <span> {{ p }} </span>
+                    {% endif %}
+                {% else %}
+                    <span>...</span>
+                {% endif %}
+            </li>
+        {% endfor %}
+
+        {% if paginate.has_next %}
+            <li><a href="/home/order_list?page={{ paginate.next_num }}">下一页</a></li>
+        {% endif %}
+        <li><a href="/home/order_list?page={{ paginate.pages }}">尾页</a></li>
+        <span>| 共{{ paginate.pages }}页 | 当前第{{ paginate.page }}页</span>
+    </ul>
+
+</div>
+<script>
+    function btn_refresh() {
+        window.location.reload();
+    }
+
+    function btn_export() {
+        {#获取最新的订货报表#}
+        $.ajax({
+            type: "POST",
+            url: "{{ url_for('home.get_orderurl') }}",
+            contentType: 'application/json;charset=UTF-8',
+            success: function (result) {
+                if (result['status'] == '1') {
+                    $('.succeed_text').text(result['msg']);
+                    $('.order_download').attr('href', result['url']);
+                    $('.order_download').attr('download', '订货报表');
+                    $("#myModal_succeed").modal({backdrop: 'static', keyboard: true});
+                    $("#myModal_succeed").show();
+                } else {
+                    $('.warning_text').text(result['msg']);
+                    $("#myModal_warning").modal({backdrop: 'static', keyboard: true});
+                    $("#myModal_warning").show();
+                }
+            }
+        });
+    }
+</script>
+</body>
+</html>

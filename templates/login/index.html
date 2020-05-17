@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>登录</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css"/>
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+<!-- 主页面 -->
+<div>
+    <!-- 登录框 -->
+    <div>
+        <div class="login_title">
+            <i class="glyphicon glyphicon-home login_logo"></i>
+            <span class="login_headline" aria-describedby="basic-addon3">订货管理系统</span>
+        </div>
+        <div class="login_input">
+            <div class="input-group username_input">
+                <span class="input-group-addon" id="basic-addon1"><i class="glyphicon glyphicon-user"></i></span>
+                <label for="username"></label><input type="text" class="form-control" id="username" placeholder="用户名"
+                                                     aria-describedby="basic-addon1" autocomplete="off">
+            </div>
+            <div class="input-group password_input">
+                <span class="input-group-addon" id="basic-addon2"><i class="glyphicon glyphicon-lock"></i></span>
+                <label for="password"></label><input type="password" class="form-control" id="password" placeholder="密码"
+                                                     aria-describedby="basic-addon2">
+            </div>
+            <div class="login_button_div">
+                <button type="button" class="btn btn-primary login_button" onclick="onlogin()">登录</button>
+            </div>
+            <div class="registering_button_div">
+                <button type="button" class="btn btn-info registering_button" onclick="onregister()">马上注册</button>
+            </div>
+        </div>
+    </div>
+    <!-- 登录框end -->
+    <!-- 注册框 -->
+    <div>
+
+    </div>
+    <!-- 注册框end -->
+    <!-- 页面底部 -->
+    <div class="login_foot">
+        <p class="foot">© 2020 CYC</p>
+    </div>
+    <!-- 页面底部end -->
+</div>
+<!-- 主页面end -->
+</body>
+<script>
+    function onlogin() {
+        let username = document.getElementById('username').value;
+        let password = document.getElementById('password').value;
+        let login_info = {'username': username, 'password': password};
+        $.ajax({
+            type: "POST",
+            url: "{{ url_for('login.onlogin') }}",
+            data: JSON.stringify(login_info),
+            contentType: 'application/json;charset=UTF-8',
+            success: function (result) {
+                if (result == '1') {
+                    <!-- 登陆成功，跳转页面 -->
+                    window.location.href = "/home/index";
+                }else{
+                    <!-- 显示错误信息 -->
+                }
+            }
+        });
+    }
+    
+    function onregister() {
+        alert('该功能尚未开放')
+    }
+</script>
+</html>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>supplier_list</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <link href="/static/css/haiersoft.css" rel="stylesheet" type="text/css" media="screen,print"/>
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css"/>
+    <link href="/static/css/print.css" rel="stylesheet" type="text/css" media="print"/>
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+<!-- 警告模态框（Modal） -->
+<div class="modal fade" id="myModal_warning" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">删除提示</h4>
+            </div>
+            <form method="post">
+                <div class="modal-body warning_modal">
+                    <i class="glyphicon glyphicon-warning-sign warning_logo"></i>
+                    <p class="warning_text">确定要删除该供应商信息吗？</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="delete_data()">删除</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+<!-- 编辑模态框（Modal） -->
+<div class="modal fade" id="myModal_altering" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">修改供应商信息</h4>
+            </div>
+            <form method="post">
+                <div class="modal-body alter_modal">
+                    <div class="form-group">
+                        <label for="supplier_alter_id">供应商编号</label>
+                        <input type="text" class="form-control" id="supplier_alter_id" placeholder="请输入供应商编号"
+                               autocomplete="off" readonly="readonly">
+                    </div>
+                    <div class="form-group">
+                        <label for="supplier_alter_conname">供应商名称</label>
+                        <input type="text" class="form-control" id="supplier_alter_conname" placeholder="请输入供应商名称（公司名）"
+                               autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="supplier_alter_name">联系人</label>
+                        <input type="text" class="form-control" id="supplier_alter_name" placeholder="请输入联系人名称"
+                               autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="supplier_alter_contact">联系方式</label>
+                        <input type="text" class="form-control" id="supplier_alter_contact" placeholder="请输入供应商联系方式"
+                               autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="supplier_alter_address">地址</label>
+                        <input type="text" class="form-control" id="supplier_alter_address" placeholder="请输入供应商地址"
+                               autocomplete="off">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="alter_data()">修改</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+<!-- 输入模态框（Modal） -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">添加供应商信息</h4>
+            </div>
+            <form method="post">
+                <div class="modal-body add_modal">
+                    <div class="form-group">
+                        <label for="supplier_add_conname">供应商名称</label>
+                        <input type="text" class="form-control" id="supplier_add_conname" placeholder="请输入供应商名称（公司名）"
+                               autocomplete="off">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="supplier_add_name">联系人</label>
+                        <input type="text" class="form-control" id="supplier_add_name" placeholder="请输入联系人名称"
+                               autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="supplier_add_contact">联系方式</label>
+                        <input type="text" class="form-control" id="supplier_add_contact" placeholder="请输入供应商联系方式"
+                               autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="supplier_add_address">地址</label>
+                        <input type="text" class="form-control" id="supplier_add_address" placeholder="请输入供应商地址"
+                               autocomplete="off">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="add_data()">添加</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+<!-- MainForm -->
+<div id="MainForm">
+    <div class="form_boxA">
+        <h2>
+            供应商信息列表
+            <div class="h2_btn">
+                <button type="button" class="btn btn-info btn-sm" onclick="btn_refresh()">刷新页面</button>
+                <button type="button" class="btn btn-success btn-sm" onclick="btn_add()">添加供应商+</button>
+            </div>
+        </h2>
+        <table class="table table-striped table-hover" cellpadding="0" cellspacing="0">
+            <tr>
+                <th>序号</th>
+                <th>供应商编号</th>
+                <th>供应商名称</th>
+                <th>联系人</th>
+                <th>联系方式</th>
+                <th>地址</th>
+                <th>操作</th>
+            </tr>
+            {% for index, supplier in suppliers %}
+                <tr>
+                    <td>{{ index + 1 }}</td>
+                    <td>{{ '%08d' % supplier.supplier_id }}</td>
+                    <td>{{ supplier.supplier_contact_name }}</td>
+                    <td>{{ supplier.supplier_name }}</td>
+                    <td>{{ supplier.supplier_contact }}</td>
+                    <td>{{ supplier.supplier_address }}</td>
+                    <td>
+                        <button type="button" class="btn btn-primary btn-xs"
+                                onclick="altering_data({{ supplier.supplier_id }},'{{ supplier.supplier_contact_name }}', '{{ supplier.supplier_name }}', '{{ supplier.supplier_contact }}', '{{ supplier.supplier_address }}')">
+                            编辑
+                        </button>
+                        <button type="button" class="btn btn-danger btn-xs"
+                                onclick="delete_warning({{ supplier.supplier_id }})">
+                            删除
+                        </button>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+        <p class="msg">共找到{{ paginate.total }}条匹配记录</p>
+    </div>
+
+    <ul id="PageNum">
+
+        <li><a href="/home/supplier_list?page=1">首页</a></li>
+        {% if paginate.has_prev %}
+            <li><a href="/home/supplier_list?page={{ paginate.prev_num }}">上一页</a></li>
+        {% endif %}
+
+        {% for p  in paginate.iter_pages() %}
+            <li>
+                {% if p %}
+                    {% if p != paginate.page %}
+                        <a href="/home/supplier_list?page={{ p }}">{{ p }}</a>
+                    {% else %}
+                        <span> {{ p }} </span>
+                    {% endif %}
+                {% else %}
+                    <span>...</span>
+                {% endif %}
+            </li>
+        {% endfor %}
+
+        {% if paginate.has_next %}
+            <li><a href="/home/supplier_list?page={{ paginate.next_num }}">下一页</a></li>
+        {% endif %}
+        <li><a href="/home/supplier_list?page={{ paginate.pages }}">尾页</a></li>
+        <span>| 共{{ paginate.pages }}页 | 当前第{{ paginate.page }}页</span>
+    </ul>
+
+</div>
+
+</body>
+<script>
+    function btn_refresh() {
+        window.location.reload();
+    }
+
+    function btn_add() {
+        $("#myModal").modal({backdrop: 'static', keyboard: true});
+        $("#myModal").show();
+    }
+
+    function add_data() {
+        {#获取模态框的数据#}
+        {#let supplier_conname = document.getElementById('supplier_add_conname').value;#}
+        {#let supplier_name = document.getElementById('supplier_add_name').value;#}
+        {#let supplier_contact = document.getElementById('supplier_add_contact').value;#}
+        {#let supplier_address = document.getElementById('supplier_add_address').value;#}
+
+        let supplier_conname = $.trim($("#supplier_add_conname").val());
+        let supplier_name = $.trim($("#supplier_add_name").val());
+        let supplier_contact = $.trim($("#supplier_add_contact").val());
+        let supplier_address = $.trim($("#supplier_add_address").val());
+
+        let data = {
+            'supplier_conname': supplier_conname, 'supplier_name': supplier_name,
+            'supplier_contact': supplier_contact, 'supplier_address': supplier_address
+        };
+
+        {#把数据传到后台#}
+        $.ajax({
+            type: "POST",
+            url: "{{ url_for('home.supplier_add') }}",
+            data: JSON.stringify(data),
+            contentType: 'application/json;charset=UTF-8',
+            success: function (result) {
+                if (result == '1') {
+                    alert('数据添加成功');
+                    window.location.reload();
+                } else {
+                    alert(result);
+                }
+            }
+        });
+
+    }
+
+
+    function altering_data(id, contact_name, name, contact, address) {
+        {#获取数据#}
+        {#格式化数字#}
+        let len_ = 8;
+        let id_ = (Array(len_).join(0) + id).slice(-len_);
+        $("#supplier_alter_id").val(id_);
+        $("#supplier_alter_conname").val(contact_name);
+        $("#supplier_alter_name").val(name);
+        $("#supplier_alter_contact").val(contact);
+        $("#supplier_alter_address").val(address);
+
+        {#显示模态框#}
+        $("#myModal_altering").modal({backdrop: 'static', keyboard: true});
+        $("#myModal_altering").show();
+    }
+
+    var ID;
+
+    function delete_warning(id) {
+        {#删除数据提醒#}
+        ID = id;
+        $("#myModal_warning").modal({backdrop: 'static', keyboard: true});
+        $("#myModal_warning").show();
+    }
+
+    function delete_data() {
+        {#删除数据#}
+        let data = {'supplier_id': ID};
+        $.ajax({
+            type: "POST",
+            url: "{{ url_for('home.supplier_delete') }}",
+            data: JSON.stringify(data),
+            contentType: 'application/json;charset=UTF-8',
+            success: function (result) {
+                if (result == '1') {
+                    window.location.reload();
+                } else {
+                    alert(result);
+                }
+            }
+        });
+    }
+
+    function alter_data() {
+        {#编辑数据#}
+        {#获取相应的值#}
+        let supplier_id_ = $("#supplier_alter_id").val();
+        let supplier_id = parseInt(supplier_id_);
+        let supplier_conname = $.trim($("#supplier_alter_conname").val());
+        let supplier_name = $.trim($("#supplier_alter_name").val());
+        let supplier_contact = $.trim($("#supplier_alter_contact").val());
+        let supplier_address = $.trim($("#supplier_alter_address").val());
+
+        let data = {
+            'supplier_id': supplier_id,
+            'supplier_conname': supplier_conname,
+            'supplier_name': supplier_name,
+            'supplier_contact': supplier_contact,
+            'supplier_address': supplier_address
+        };
+        $.ajax({
+            type: "POST",
+            url: "{{ url_for('home.supplier_alter') }}",
+            data: JSON.stringify(data),
+            contentType: 'application/json;charset=UTF-8',
+            success: function (result) {
+                if (result == '1') {
+                    alert('供应商信息修改成功');
+                    window.location.reload();
+                } else {
+                    alert(result);
+                }
+            }
+        });
+    }
+</script>
+</html>

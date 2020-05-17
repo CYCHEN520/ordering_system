@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>order_list</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <link href="/static/css/haiersoft.css" rel="stylesheet" type="text/css" media="screen,print"/>
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css"/>
+    <link href="/static/css/print.css" rel="stylesheet" type="text/css" media="print"/>
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+<!-- MainForm -->
+<div id="MainForm">
+    <div class="form_boxA">
+        <h2>零件出入库</h2>
+        <div class="affair_operation">
+            {#            <div class="form-group affair_name_input">#}
+            {#                <label for="part_name">零件编号(名称)</label>#}
+            {#                <input type="text" class="form-control" id="part_name" list="search_list" autocomplete="off"#}
+            {#                       placeholder="请输入零件的编号/名称"#}
+            {#                       autocomplete="off">#}
+            {#                <!-- 选择内容 -->#}
+            {#                <datalist id="search_list">#}
+            {#                </datalist>#}
+            {#            </div>#}
+            <div class="form-group affair_name_input">
+                <label for="part_name">零件名称(编号)</label>
+                <select class="form-control part_name" id="part_name">
+                    {% for id_name in store_id_name %}
+                        {% if id_name.part != None %}
+                            <option value="{{ id_name.part_id }}">{{ '%s(%08d)' % ( id_name.part.part_name, id_name.part_id) }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group affair_num_input">
+                <label for="part_num">零件数量</label>
+                <input type="text" class="form-control" id="part_num" placeholder="请输入零件的数量" autocomplete="off"
+                       oninput="value=value.replace(/[^\d]/g,'')">
+            </div>
+            {#            <div class="affair_option_input">#}
+            {#                <label class="radio-inline affair_option_in">#}
+            {#                    <input type="radio" name="affair_option" id="affair_option1" value="1" checked> 入库（增加库存）#}
+            {#                </label>#}
+            {#                <label class="radio-inline affair_option_out">#}
+            {#                    <input type="radio" name="affair_option" id="affair_option2" value="0"> 出库（减少库存）#}
+            {#                </label>#}
+            {#            </div>#}
+
+            <div class="affair_option_input">
+                <label for="is_in">入库/出库</label>
+                <select class="form-control is_in">
+                    <option value="1" selected>入库</option>
+                    <option value="0">出库</option>
+                </select>
+            </div>
+            <button type="button" class="btn btn-primary affair_submit_button" onclick="affair_submit()">提交信息</button>
+            {#            <button type="button" class="btn btn-warning affair_refresh_button" onclick="affair_refresh()">重置信息</button>#}
+        </div>
+    </div>
+</div>
+
+</body>
+<script>
+    {#$('input#part_name').bind('keyup', function () {#}
+    {#获取需要返回的模糊查询的零件名称#}
+    {#    let name = document.getElementById('part_name').value;#}
+    {#    let fuzzy_data = {'fuzzy_data': name};#}
+    {#    $.ajax({#}
+    {#        type: "POST",#}
+    {#        url: "{{ url_for('home.affair_search') }}",#}
+    {#        data: JSON.stringify(fuzzy_data),#}
+    {#        contentType: 'application/json;charset=UTF-8',#}
+    {#        success: function (result) {#}
+    {#            $('datalist#search_list').empty();#}
+    {#            let len = result.length;#}
+    {#            for (let i = 0; i < result.length; i++) {#}
+    {#                let add_options = '<option value="' + result[i][i] + '">' + result[i][i] + '</option>';#}
+    {#                $('datalist#search_list').append(add_options);#}
+    {#            }#}
+    {#        }#}
+    {#    });#}
+
+    function affair_submit() {
+        {#获取相应的值#}
+        let part_id_ = $('.part_name option:selected').val();
+        let part_id = parseInt(part_id_);
+        let part_num_ = document.getElementById('part_num').value;
+        let part_num = parseInt(part_num_);
+        let is_in_ = $('.is_in option:selected').val();
+        let is_in = parseInt(is_in_);
+
+        let data = {'part_id': part_id, 'part_num': part_num, 'is_in': is_in};
+        $.ajax({
+            type: "POST",
+            url: "{{ url_for('home.affair_submit') }}",
+            data: JSON.stringify(data),
+            contentType: 'application/json;charset=UTF-8',
+            success: function (result) {
+                if (result == '1') {
+                    alert('事务处理成功');
+                    window.location.reload();
+                } else {
+                    alert(result);
+                }
+            }
+        });
+    }
+
+    {#function affair_refresh() {#}
+    {#清空所有值#}
+    {#    $('.part_name').val("");#}
+    {#    $('#part_num').val("");#}
+    {#    $('datalist#search_list').empty();#}
+
+</script>
+</html>

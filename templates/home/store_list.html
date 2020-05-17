@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>store_list</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <link href="/static/css/haiersoft.css" rel="stylesheet" type="text/css" media="screen,print"/>
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css"/>
+    <link href="/static/css/print.css" rel="stylesheet" type="text/css" media="print"/>
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+<!-- 编辑模态框（Modal） -->
+<div class="modal fade" id="myModal_altering" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">修改库存信息</h4>
+            </div>
+            <form method="post">
+                <div class="modal-body alter_modal">
+                    <div class="form-group">
+                        <label for="store_alter_id">库存编号</label>
+                        <input type="text" class="form-control" id="store_alter_id" placeholder="请输入库存编号"
+                               autocomplete="off" readonly="readonly">
+                    </div>
+                    <div class="form-group">
+                        <label for="store_part_alter_id">零件编号</label>
+                        <input type="text" class="form-control" id="store_part_alter_id" placeholder="请输入零件编号"
+                               autocomplete="off" readonly="readonly">
+                    </div>
+                    <div class="form-group">
+                        <label for="store_part_alter_name">零件名称</label>
+                        <input type="text" class="form-control" id="store_part_alter_name" placeholder="请输入零件名称"
+                               autocomplete="off" readonly="readonly">
+                    </div>
+                    <div class="form-group">
+                        <label for="store_alter_num">库存量</label>
+                        <input type="text" class="form-control" id="store_alter_num" placeholder="请输入库存量"
+                               autocomplete="off" oninput="value=value.replace(/[^\d]/g,'')">
+                    </div>
+                    <div class="form-group">
+                        <label for="store_alter_cv">库存临界值</label>
+                        <input type="text" class="form-control" id="store_alter_cv" placeholder="请输入库存临界值"
+                               autocomplete="off" oninput="value=value.replace(/[^\d]/g,'')">
+                    </div>
+                    <div class="form-group">
+                        <label for="store_alter_max">库存最大值</label>
+                        <input type="text" class="form-control" id="store_alter_max" placeholder="请输入库存最大值"
+                               autocomplete="off" oninput="value=value.replace(/[^\d]/g,'')">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="alter_data()">修改</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+<!-- 输入模态框（Modal） -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">添加库存信息</h4>
+            </div>
+            <form method="post">
+                <div class="modal-body add_modal">
+                    <div class="form-group">
+                        <label for="store_part_add_id">零件名称(编号)</label>
+                        <select class="form-control store_part_add_id" id="store_part_add_id">
+                            {% for part in parts %}
+                                <option value="{{ part.part_id }}">
+                                    {{ part.part_name +"(%08d)" % part.part_id }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="store_add_num">库存量</label>
+                        <input type="text" class="form-control" id="store_add_num" placeholder="请输入零件库存量"
+                               autocomplete="off" oninput="value=value.replace(/[^\d]/g,'')">
+                    </div>
+                    <div class="form-group">
+                        <label for="store_add_cv">库存临界值</label>
+                        <input type="text" class="form-control" id="store_add_cv" placeholder="请输入零件库存临界值"
+                               autocomplete="off" oninput="value=value.replace(/[^\d]/g,'')">
+                    </div>
+                    <div class="form-group">
+                        <label for="store_add_max">库存最大值</label>
+                        <input type="text" class="form-control" id="store_add_max" placeholder="请输入零件库存最大值"
+                               autocomplete="off" oninput="value=value.replace(/[^\d]/g,'')">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="add_data()">添加</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+<!-- MainForm -->
+<div id="MainForm">
+    <div class="form_boxA">
+        <h2>
+            库存清单列表
+            <div class="h2_btn">
+                <button type="button" class="btn btn-info btn-sm" onclick="btn_refresh()">刷新页面</button>
+                <button type="button" class="btn btn-success btn-sm" onclick="btn_add()">添加库存清单＋</button>
+            </div>
+        </h2>
+        <table class="table table-striped table-hover" cellpadding="0" cellspacing="0">
+            <tr>
+                <th>序号</th>
+                <th>库存编号</th>
+                <th>零件编号</th>
+                <th>零件名称</th>
+                <th>库存量</th>
+                <th>库存临界值</th>
+                <th>库存最大值</th>
+                <th>操作</th>
+            </tr>
+            {% for index, store in stores %}
+                {% if store.part != None %}
+                    <tr>
+                        <td>{{ index + 1 }}</td>
+                        <td>{{ '%08d' % store.store_id }}</td>
+                        <td>{{ '%08d' % store.part_id }}</td>
+                        <td>{{ store.part.part_name }}</td>
+                        <td>{{ store.store_num }}</td>
+                        <td>{{ store.store_cv }}</td>
+                        <td>{{ store.store_max }}</td>
+                        <td>
+                            <button type="button" class="btn btn-primary btn-xs"
+                                    onclick="altering_data({{ store.store_id }},{{ store.part.part_id }}, '{{ store.part.part_name }}', {{ store.store_num }}, {{ store.store_cv }}, {{ store.store_max }})">
+                                编辑
+                            </button>
+                        </td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </table>
+        <p class="msg">共找到{{ paginate.total }}条匹配记录</p>
+    </div>
+
+    <ul id="PageNum">
+
+        <li><a href="/home/store_list?page=1">首页</a></li>
+        {% if paginate.has_prev %}
+            <li><a href="/home/store_list?page={{ paginate.prev_num }}">上一页</a></li>
+        {% endif %}
+
+        {% for p  in paginate.iter_pages() %}
+            <li>
+                {% if p %}
+                    {% if p != paginate.page %}
+                        <a href="/home/store_list?page={{ p }}">{{ p }}</a>
+                    {% else %}
+                        <span> {{ p }} </span>
+                    {% endif %}
+                {% else %}
+                    <span>...</span>
+                {% endif %}
+            </li>
+        {% endfor %}
+
+        {% if paginate.has_next %}
+            <li><a href="/home/store_list?page={{ paginate.next_num }}">下一页</a></li>
+        {% endif %}
+        <li><a href="/home/store_list?page={{ paginate.pages }}">尾页</a></li>
+        <span>| 共{{ paginate.pages }}页 | 当前第{{ paginate.page }}页</span>
+    </ul>
+
+</div>
+
+</body>
+<script>
+    function btn_refresh() {
+        window.location.reload();
+    }
+
+    function btn_add() {
+        $("#myModal").modal({backdrop: 'static', keyboard: true});
+        $("#myModal").show();
+    }
+
+    function add_data() {
+        {#获取模态框的数据#}
+        let part_id_ = $('#store_part_add_id option:selected').val();
+        let part_id = parseInt(part_id_);
+        let store_num_ = $("#store_add_num").val();
+        let store_num = parseInt(store_num_);
+        let store_cv_ = $("#store_add_cv").val();
+        let store_cv = parseInt(store_cv_);
+        let store_max_ = $("#store_add_max").val();
+        let store_max = parseInt(store_max_);
+
+        let data = {
+            'part_id': part_id, 'store_num': store_num,
+            'store_cv': store_cv, 'store_max': store_max
+        };
+
+        {#把数据传到后台#}
+        $.ajax({
+            type: "POST",
+            url: "{{ url_for('home.store_add') }}",
+            data: JSON.stringify(data),
+            contentType: 'application/json;charset=UTF-8',
+            success: function (result) {
+                if (result == '1') {
+                    alert('数据添加成功');
+                    window.location.reload();
+                } else {
+                    alert(result);
+                }
+            }
+        });
+    }
+
+    function altering_data(store_id_, part_id_, part_name, num_, cv_, max_) {
+        {#获取数据#}
+        {#格式化数字#}
+        let len_ = 8;
+        let store_id = (Array(len_).join(0) + store_id_).slice(-len_);
+        let part_id = (Array(len_).join(0) + part_id_).slice(-len_);
+        $("#store_alter_id").val(store_id);
+        $("#store_part_alter_id").val(part_id);
+        $("#store_part_alter_name").val(part_name);
+        $("#store_alter_num").val(num_);
+        $("#store_alter_cv").val(cv_);
+        $("#store_alter_max").val(max_);
+
+        {#显示模态框#}
+        $("#myModal_altering").modal({backdrop: 'static', keyboard: true});
+        $("#myModal_altering").show();
+    }
+
+    function alter_data() {
+        {#编辑数据#}
+        {#获取相应的值#}
+        let store_id_ = $("#store_alter_id").val();
+        let store_id = parseInt(store_id_);
+        let store_num_ = $("#store_alter_num").val();
+        let store_num = parseInt(store_num_);
+        let store_cv_ = $("#store_alter_cv").val();
+        let store_cv = parseInt(store_cv_);
+        let store_max_ = $("#store_alter_max").val();
+        let store_max = parseInt(store_max_);
+
+
+        let data = {
+            'store_id': store_id,
+            'store_num': store_num,
+            'store_cv': store_cv,
+            'store_max': store_max,
+        };
+        $.ajax({
+            type: "POST",
+            url: "{{ url_for('home.store_alter') }}",
+            data: JSON.stringify(data),
+            contentType: 'application/json;charset=UTF-8',
+            success: function (result) {
+                if (result == '1') {
+                    alert('库存信息修改成功');
+                    window.location.reload();
+                } else {
+                    alert(result);
+                }
+            }
+        });
+    }
+</script>
+</html>
