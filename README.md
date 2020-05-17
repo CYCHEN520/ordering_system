@@ -20,5 +20,5 @@
 
 ## 运行代码
 1. 导入sql文件，创建**order_sys**数据库
-2. 将数据库的信息/utils/functions.py中的**app.config['SQLALCHEMY_DATABASE_URI']**修改为自己的数据库信息
+2. 将数据库的信息/utils/functions.py中的app.config['SQLALCHEMY_DATABASE_URI']修改为自己的数据库信息
 3. 启动manage.py，访问127.0.0.1:5000/login/index或者127.0.0.1:8090/login/index，初始用户名为admin、密码为admin
