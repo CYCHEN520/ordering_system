@@ -28,7 +28,7 @@ def create_app():
     app.register_blueprint(blueprint=ico, url_prefix='/')
 
     # 配置mysql数据库
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://username:password@127.0.0.1/order_sys'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:990406@127.0.0.1/order_sys'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     # 配置session密钥
