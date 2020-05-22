@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>part_list</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <link href="/static/css/haiersoft.css" rel="stylesheet" type="text/css" media="screen,print"/>
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css"/>
+    <link href="/static/css/print.css" rel="stylesheet" type="text/css" media="print"/>
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+<!-- 警告模态框（Modal） -->
+<div class="modal fade" id="myModal_warning" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">删除提示</h4>
+            </div>
+            <form method="post">
+                <div class="modal-body warning_modal">
+                    <i class="glyphicon glyphicon-warning-sign warning_logo"></i>
+                    <p class="warning_text2">
+                        确定要删除该零件信息吗？如果该零件已经存在于库存清单、订货信息和事务信息中，则一同删除该零件的库存信息、订货信息和事务信息
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="delete_data()">删除</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+<!-- 编辑模态框（Modal） -->
+<div class="modal fade" id="myModal_altering" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">编辑零件信息</h4>
+            </div>
+            <form method="post">
+                <div class="modal-body alter_modal">
+                    <div class="form-group">
+                        <label for="part_alter_id">零件编号</label>
+                        <input type="text" class="form-control" id="part_alter_id" placeholder="请输入零件编号"
+                               autocomplete="off" readonly="readonly">
+                    </div>
+                    <div class="form-group">
+                        <label for="part_alter_name">零件名称</label>
+                        <input type="text" class="form-control" id="part_alter_name" placeholder="请输入零件名称"
+                               autocomplete="off">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="part_alter_price">零件单价</label>
+                        <input type="text" class="form-control" id="part_alter_price" placeholder="请输入零件单价"
+                               autocomplete="off" oninput="clearNoNum(this)">
+                        {#                        <span id="part_alter_price_dot">.</span>#}
+                        {#                        <input type="text" class="form-control" id="part_alter_price_fra" placeholder="请输入小数部分"#}
+                        {#                               autocomplete="off" onkeyup="clearNoNum(this)">#}
+                    </div>
+                    <div class="form-group">
+                        <label for="part_alter_psupp">主要供应商</label>
+                        <select class="form-control part_alter_psupp" id="part_alter_psupp">
+                            {% for supplier in suppliers %}
+                                <option value="{{ supplier.supplier_id }}">
+                                    {{ supplier.supplier_name +"(%s)" % supplier.supplier_contact_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="part_alter_ssupp">次要供应商</label>
+                        <select class="form-control part_alter_ssupp" id="part_alter_ssupp">
+                            <option value="None">无</option>
+                            {% for supplier in suppliers %}
+                                <option value="{{ supplier.supplier_id }}">
+                                    {{ supplier.supplier_name +"(%s)" % supplier.supplier_contact_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="alter_data()">修改</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+<!-- 输入模态框（Modal） -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">添加零件信息</h4>
+            </div>
+            <form method="post">
+                <div class="modal-body add_modal">
+                    <div class="form-group supplier_model_name">
+                        <label for="part_add_name">零件名称</label>
+                        <input type="text" class="form-control" id="part_add_name" placeholder="请输入零件名称"
+                               autocomplete="off">
+                    </div>
+
+                    <div class="form-group supplier_model_name">
+                        <label for="part_add_price">零件单价</label>
+                        <input type="text" class="form-control" id="part_add_price" placeholder="请输入零件单价"
+                               autocomplete="off" oninput="clearNoNum(this)">
+                    </div>
+                    <div class="form-group supplier_model_name">
+                        <label for="part_add_psupp">主要供应商</label>
+                        <select class="form-control part_add_psupp" id="part_add_psupp">
+                            {% for supplier in suppliers %}
+                                <option value="{{ supplier.supplier_id }}">
+                                    {{ supplier.supplier_name +"(%s)" % supplier.supplier_contact_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group supplier_model_name">
+                        <label for="part_add_ssupp">次要供应商</label>
+                        <select class="form-control part_add_ssupp" id="part_add_ssupp">
+                            <option value=""></option>
+                            {% for supplier in suppliers %}
+                                <option value="{{ supplier.supplier_id }}">
+                                    {{ supplier.supplier_name +"(%s)" % supplier.supplier_contact_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="add_data()">添加</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+<!-- MainForm -->
+<div id="MainForm">
+    <div class="form_boxA">
+        <h2>
+            零件信息列表
+            <div class="h2_btn">
+                <button type="button" class="btn btn-info btn-sm" onclick="btn_refresh()">刷新页面</button>
+                <button type="button" class="btn btn-success btn-sm" onclick="btn_add()">添加零件+</button>
+            </div>
+        </h2>
+        <table class="table table-striped table-hover" cellpadding="0" cellspacing="0">
+            <tr>
+                <th>序号</th>
+                <th>零件编号</th>
+                <th>零件名称</th>
+                <th>零件单价</th>
+                <th>操作</th>
+            </tr>
+            {% for index, part in parts %}
+                <tr>
+                    <td>{{ index + 1 }}</td>
+                    <td>{{ '%08d' % part.part_id }}</td>
+                    <td>{{ part.part_name }}</td>
+                    <td>{{ part.part_price }}</td>
+                    <td>
+                        <button type="button" class="btn btn-primary btn-xs"
+                                onclick="altering_data({{ part.part_id }},'{{ part.part_name }}', {{ part.part_price }}, {{ part.p_supplier_id }}, {{ part.s_supplier_id if part.s_supplier_id != None else '"None"' }})">
+                            编辑
+                        </button>
+                        <button type="button" class="btn btn-danger btn-xs"
+                                onclick="delete_warning({{ part.part_id }})">
+                            删除
+                        </button>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+        <p class="msg">共找到{{ paginate.total }}条匹配记录</p>
+    </div>
+
+    <ul id="PageNum">
+
+        <li><a href="/home/part_list?page=1">首页</a></li>
+        {% if paginate.has_prev %}
+            <li><a href="/home/part_list?page={{ paginate.prev_num }}">上一页</a></li>
+        {% endif %}
+
+        {% for p  in paginate.iter_pages() %}
+            <li>
+                {% if p %}
+                    {% if p != paginate.page %}
+                        <a href="/home/part_list?page={{ p }}">{{ p }}</a>
+                    {% else %}
+                        <span> {{ p }} </span>
+                    {% endif %}
+                {% else %}
+                    <span>...</span>
+                {% endif %}
+            </li>
+        {% endfor %}
+
+        {% if paginate.has_next %}
+            <li><a href="/home/part_list?page={{ paginate.next_num }}">下一页</a></li>
+        {% endif %}
+        {% if paginate.pages == 0 %}
+            <li><a href="/home/part_list?page=1">尾页</a></li>
+        {% else %}
+            <li><a href="/home/part_list?page={{ paginate.pages }}">尾页</a></li>
+        {% endif %}
+        <span>| 共{{ paginate.pages }}页 | 当前第{{ paginate.page }}页</span>
+    </ul>
+
+</div>
+
+</body>
+<script>
+    function btn_refresh() {
+        window.location.reload();
+    }
+
+    function btn_add() {
+        $("#myModal").modal({backdrop: 'static', keyboard: true});
+        $("#myModal").show();
+    }
+
+    function add_data() {
+        let part_name = $.trim($("#part_add_name").val());
+        let part_price = $.trim($("#part_add_price").val());
+        let part_psupp = $.trim($("#part_add_psupp").val());
+        let part_ssupp = $.trim($("#part_add_ssupp").val());
+
+        let data = {
+            'part_name': part_name, 'part_price': part_price,
+            'part_psupp': part_psupp, 'part_ssupp': part_ssupp
+        };
+
+        {#把数据传到后台#}
+        $.ajax({
+            type: "POST",
+            url: "{{ url_for('home.part_add') }}",
+            data: JSON.stringify(data),
+            contentType: 'application/json;charset=UTF-8',
+            success: function (result) {
+                if (result == '1') {
+                    alert('数据添加成功');
+                    window.location.reload();
+                } else {
+                    alert(result);
+                }
+            }
+        });
+    }
+
+    function altering_data(id, name, price, psupp_id, ssupp_id) {
+        {#获取数据#}
+        {#格式化数字#}
+        let len_ = 8;
+        let id_ = (Array(len_).join(0) + id).slice(-len_);
+        $("#part_alter_id").val(id_);
+        $("#part_alter_name").val(name);
+        $("#part_alter_price").val(price);
+        {#清除先前selected属性#}
+        $(".part_alter_psupp").find("option:selected").prop("selected", false);
+        $(".part_alter_ssupp").find("option:selected").prop("selected", false);
+        {#设置select选中的option#}
+        $(".part_alter_psupp").find("option[value=" + psupp_id + "]").prop("selected", true);
+        $(".part_alter_ssupp").find("option[value=" + ssupp_id + "]").prop("selected", true);
+        {#显示模态框#}
+        $("#myModal_altering").modal({backdrop: 'static', keyboard: true});
+        $("#myModal_altering").show();
+    }
+
+    function alter_data() {
+        {#编辑数据#}
+        {#获取相应的值#}
+        let part_id_ = $("#part_alter_id").val();
+        {#let part_id = part_id_.replaceAll('0', '');#}
+        let part_id = parseInt(part_id_);
+        let part_name = $.trim($("#part_alter_name").val());
+        let part_price = $("#part_alter_price").val();
+        let psupp_id_ = $('.part_add_psupp option:selected').val();
+        let psupp_id = parseInt(psupp_id_);
+        let ssupp_id_ = $('.part_add_ssupp option:selected').val();
+        let ssupp_id;
+        if (ssupp_id_ == "None") {
+            ssupp_id = null;
+        } else {
+            ssupp_id = parseInt(ssupp_id_);
+        }
+
+        let data = {
+            'part_id': part_id,
+            'part_name': part_name,
+            'part_price': part_price,
+            'psupp_id': psupp_id,
+            'ssupp_id': ssupp_id
+        };
+        $.ajax({
+            type: "POST",
+            url: "{{ url_for('home.part_alter') }}",
+            data: JSON.stringify(data),
+            contentType: 'application/json;charset=UTF-8',
+            success: function (result) {
+                if (result == '1') {
+                    alert('零件信息修改成功');
+                    window.location.reload();
+                } else {
+                    alert(result);
+                }
+            }
+        });
+    }
+
+    var ID;
+
+    function delete_warning(id) {
+        {#删除数据提醒#}
+        ID = parseInt(id);
+        $("#myModal_warning").modal({backdrop: 'static', keyboard: true});
+        $("#myModal_warning").show();
+    }
+
+    function delete_data() {
+        {#删除数据#}
+        let data = {'part_id': ID};
+        $.ajax({
+            type: "POST",
+            url: "{{ url_for('home.part_delete') }}",
+            data: JSON.stringify(data),
+            contentType: 'application/json;charset=UTF-8',
+            success: function (result) {
+                if (result['status'] == '1') {
+                    alert(result['msg']);
+                    window.location.reload();
+                } else {
+                    alert(result['msg']);
+                }
+            }
+        });
+    }
+
+    function clearNoNum(obj) {
+        {#先把非数字的都替换掉，除了数字和.#}
+        obj.value = obj.value.replace(/[^\d.]/g, "");
+        {#必须保证第一个为数字而不是.#}
+        obj.value = obj.value.replace(/^\./g, "");
+        {#保证只有出现一个.而没有多个.#}
+        obj.value = obj.value.replace(/\.{2,}/g, ".");
+        {#保证.只出现一次，而不能出现两次以上#}
+        obj.value = obj.value.replace(".", "$#$").replace(/\./g, "").replace("$#$", ".");
+        {#小数点后只能输入两位#}
+        obj.value = obj.value.replace(/^(\-)*(\d+)\.(\d\d).*$/, '$1$2.$3');
+    }
+</script>
+</html>

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>affair_list</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <link href="/static/css/haiersoft.css" rel="stylesheet" type="text/css" media="screen,print"/>
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css"/>
+    <link href="/static/css/print.css" rel="stylesheet" type="text/css" media="print"/>
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+<!-- 警告模态框（Modal） -->
+<div class="modal fade" id="myModal_warning" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">删除提示</h4>
+            </div>
+            <form method="post">
+                <div class="modal-body warning_modal">
+                    <i class="glyphicon glyphicon-warning-sign warning_logo"></i>
+                    <p class="warning_text">
+                        确定要删除该事务信息吗？
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="delete_data()">删除</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+<!-- 编辑模态框（Modal） -->
+<div class="modal fade" id="myModal_altering" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">编辑事务信息</h4>
+            </div>
+            <form method="post">
+                <div class="modal-body alter_modal">
+                    <div class="form-group">
+                        <label for="affair_alter_id">事务编号</label>
+                        <input type="text" class="form-control" id="affair_alter_id" placeholder="请输入事务编号"
+                               autocomplete="off" readonly="readonly">
+                    </div>
+                    <div class="form-group">
+                        <label for="affair_part_alter_id">零件编号</label>
+                        <input type="text" class="form-control" id="affair_part_alter_id" placeholder="请输入零件编号"
+                               autocomplete="off" readonly="readonly">
+                    </div>
+                    <div class="form-group">
+                        <label for="affair_alter_type">事务类型</label>
+                        <select class="form-control affair_alter_type" id="affair_alter_type" onchange="is_in_change()">
+                            <option value="0">
+                                出库
+                            </option>
+                            <option value="1">
+                                入库
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-group affair_show_order_id">
+                        <label for="affair_order_alter_id">该零件所在的订货信息</label>
+                        <select class="form-control affair_order_alter_id" id="affair_order_alter_id">
+                            <option value="None">无</option>
+                            {% for order in orders %}
+                                {% if order.o_part != None %}
+                                    <option value="{{ order.order_id }}">
+                                        {{ '(%08d)%s(订货数量:%d,已购数量:%d)' % (order.order_id, order.o_part.part_name, order.order_num, order.purchased_num) }}
+                                    </option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="affair_alter_num">出/入库零件数量</label>
+                        <input type="text" class="form-control" id="affair_alter_num" placeholder="请输入出入库零件数量"
+                               autocomplete="off" oninput="value=value.replace(/[^\d]/g,'')">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="alter_data()">修改</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </form>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+<!-- MainForm -->
+<div id="MainForm">
+    <div class="form_boxA">
+        <h2>
+            事务列表
+            <div class="h2_btn">
+                <button type="button" class="btn btn-info btn-sm" onclick="btn_refresh()">刷新页面</button>
+            </div>
+        </h2>
+        <table class="table table-striped table-hover" cellpadding="0" cellspacing="0">
+            <tr>
+                <th>序号</th>
+                <th>事务编号</th>
+                <th>零件编号</th>
+                {#                <th>零件名称</th>#}
+                <th>事务类型</th>
+                <th>出/入库零件数量</th>
+                <th>事务提交时间</th>
+                <th>事务完成时间</th>
+                <th>事务状态</th>
+                <th>操作</th>
+            </tr>
+            {% for index, ls in affair_ls %}
+                <tr>
+                    <td>{{ index + 1 }}</td>
+                    <td>{{ '%08d' % ls.affair_id }}</td>
+                    <td>{{ '%08d' % ls.part_id }}</td>
+                    {#                    <td>{{ ls.part_name }}</td>#}
+                    <td>{{ '入库' if ls.affair_type else '出库' }}</td>
+                    <td>{{ ls.affair_num }}</td>
+                    <td>{{ ls.affair_commit_time }}</td>
+                    {% if ls.affair_finish_time == None %}
+                        <td><span style="color: tomato">未完成</span></td>
+                    {% else %}
+                        <td>{{ ls.affair_finish_time }}</td>
+                    {% endif %}
+                    {% if ls.a_status != None %}
+                        {% if ls.affair_status == 0 %}
+                            <td><span style="color: tomato">{{ ls.a_status.status_explain }}</span></td>
+                            <td>
+                                <button type="button" class="btn btn-primary btn-xs"
+                                        onclick="altering_data({{ ls.affair_id }}, {{ ls.part_id }}, '{{ ls.order_id }}', {{ ls.affair_type }}, {{ ls.affair_num }})">
+                                    编辑
+                                </button>
+                                <button type="button" class="btn btn-danger btn-xs"
+                                        onclick="delete_warning({{ ls.affair_id }})">
+                                    删除
+                                </button>
+                            </td>
+                        {% else %}
+                            <td><span style="color: green">{{ ls.a_status.status_explain }}</span></td>
+                            <td>
+                                <button type="button" class="btn btn-primary btn-xs" disabled="disabled">
+                                    编辑
+                                </button>
+                                <button type="button" class="btn btn-danger btn-xs" disabled="disabled">
+                                    删除
+                                </button>
+                            </td>
+                        {% endif %}
+
+                    {% else %}
+                        <td><span style="color: red">状态未知</span></td>
+                        <td>
+                            <button type="button" class="btn btn-primary btn-xs" disabled="disabled">
+                                编辑
+                            </button>
+                            <button type="button" class="btn btn-danger btn-xs" disabled="disabled">
+                                删除
+                            </button>
+                        </td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </table>
+        <p class="msg">共找到{{ paginate.total }}条匹配记录</p>
+    </div>
+
+    <ul id="PageNum">
+
+        <li><a href="/home/affair_list?page=1">首页</a></li>
+        {% if paginate.has_prev %}
+            <li><a href="/home/affair_list?page={{ paginate.prev_num }}">上一页</a></li>
+        {% endif %}
+
+        {% for p  in paginate.iter_pages() %}
+            <li>
+                {% if p %}
+                    {% if p != paginate.page %}
+                        <a href="/home/affair_list?page={{ p }}">{{ p }}</a>
+                    {% else %}
+                        <span> {{ p }} </span>
+                    {% endif %}
+                {% else %}
+                    <span>...</span>
+                {% endif %}
+            </li>
+        {% endfor %}
+
+        {% if paginate.has_next %}
+            <li><a href="/home/affair_list?page={{ paginate.next_num }}">下一页</a></li>
+        {% endif %}
+        {% if paginate.pages == 0 %}
+            <li><a href="/home/affair_list?page=1">尾页</a></li>
+        {% else %}
+            <li><a href="/home/affair_list?page={{ paginate.pages }}">尾页</a></li>
+        {% endif %}
+        <span>| 共{{ paginate.pages }}页 | 当前第{{ paginate.page }}页</span>
+    </ul>
+
+</div>
+
+</body>
+<script>
+    function btn_refresh() {
+        window.location.reload();
+    }
+
+    function altering_data(affair_id, part_id, order_id, affair_type, affair_num) {
+        {#获取数据#}
+        {#格式化数字#}
+        let len_ = 8;
+        let affair_id_ = (Array(len_).join(0) + affair_id).slice(-len_);
+        $("#affair_alter_id").val(affair_id_);
+        let affair_part_id_ = (Array(len_).join(0) + part_id).slice(-len_);
+        $("#affair_part_alter_id").val(affair_part_id_);
+        {#$("#affair_part_alter_name").val(part_name);#}
+        $("#affair_alter_num").val(affair_num);
+        {#清除先前selected属性#}
+        $(".affair_alter_type").find("option:selected").prop("selected", false);
+
+        {#设置select选中的option#}
+        $(".affair_alter_type").find("option[value='" + affair_type + "']").prop("selected", true);
+
+        {#如果是入库#}
+        if(affair_type == 1){
+            $(".affair_order_alter_id").find("option:selected").prop("selected", false);
+            $(".affair_order_alter_id").find("option[value='" + order_id + "']").prop("selected", true);
+            $(".affair_show_order_id").show()
+        }else{
+            $(".affair_order_alter_id").find("option:selected").prop("selected", false);
+            $(".affair_order_alter_id").find("option[value='None']").prop("selected", true);
+            $(".affair_show_order_id").hide()
+        }
+
+        {#显示模态框#}
+        $("#myModal_altering").modal({backdrop: 'static', keyboard: true});
+        $("#myModal_altering").show();
+    }
+
+    function alter_data() {
+        {#编辑数据#}
+        {#获取相应的值#}
+        let affair_id_ = $("#affair_alter_id").val();
+        {#let part_id = part_id_.replaceAll('0', '');#}
+        let affair_id = parseInt(affair_id_);
+        let part_id_ = $("#affair_part_alter_id").val();
+        let part_id = parseInt(part_id_);
+        let order_id_ = $("#affair_order_alter_id").val();
+        let order_id = parseInt(order_id_);
+        let affair_type_ = $('.affair_alter_type option:selected').val();
+        let affair_type = parseInt(affair_type_);
+        let affair_num_ = $("#affair_alter_num").val();
+        let affair_num = parseInt(affair_num_);
+
+        let data = {
+            'affair_id': affair_id,
+            'part_id': part_id,
+            'order_id':order_id,
+            'affair_type': affair_type,
+            'affair_num': affair_num,
+        };
+        $.ajax({
+            type: "POST",
+            url: "{{ url_for('home.affair_alter') }}",
+            data: JSON.stringify(data),
+            contentType: 'application/json;charset=UTF-8',
+            success: function (result) {
+                if (result == '1') {
+                    alert('事务信息修改成功');
+                    window.location.reload();
+                } else {
+                    alert(result);
+                }
+            }
+        });
+    }
+
+    var ID;
+
+    function delete_warning(id) {
+        {#删除数据提醒#}
+        ID = parseInt(id);
+        $("#myModal_warning").modal({backdrop: 'static', keyboard: true});
+        $("#myModal_warning").show();
+    }
+
+    function delete_data() {
+        {#删除数据#}
+        let data = {'affair_id': ID};
+        $.ajax({
+            type: "POST",
+            url: "{{ url_for('home.affair_delete') }}",
+            data: JSON.stringify(data),
+            contentType: 'application/json;charset=UTF-8',
+            success: function (result) {
+                if (result == '1') {
+                    window.location.reload();
+                } else {
+                    alert(result);
+                }
+            }
+        });
+    }
+    
+    function is_in_change() {
+        let is_in_ = $('.affair_alter_type option:selected').val();
+        let is_in = parseInt(is_in_);
+        if (is_in == 0) {
+            $(".affair_show_order_id").hide()
+        } else {
+            $(".affair_show_order_id").show()
+        }
+    }
+</script>
+</html>
