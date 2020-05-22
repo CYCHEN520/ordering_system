@@ -1,0 +1,354 @@
+/*.nav_top{*/
+/*    width: 100%;*/
+/*}*/
+
+.nav_left {
+    position: absolute;
+    padding: 0%;
+    border-right: 2px solid gray;
+    height: 85%;
+    width: 15%;
+}
+
+.menu_font_div {
+    border-bottom: 2px solid gray;
+    height: 40px;
+}
+
+.iframe_right {
+    position: absolute;
+    width: 80%;
+    border: none;
+    margin-left: 18%;
+}
+
+.login_title {
+    position: absolute;
+    top: 23%;
+    left: 40%;
+    height: 10%;
+    width: 20%;
+}
+
+.login_logo {
+    height: 30%;
+    font-size: 400%;
+}
+
+.login_headline {
+    font-size: 223%;
+}
+
+.login_input {
+    position: absolute;
+    top: 35%;
+    left: 40%;
+    width: 20%
+}
+
+.username_input {
+
+}
+
+.password_input {
+    margin-top: 5%;
+}
+
+.registering_button_div, .login_button_div {
+    margin-top: 5%;
+}
+
+.login_button {
+    width: 100%
+}
+
+.registering_button {
+    width: 100%
+}
+
+.login_foot {
+    position: absolute;
+    top: 67%;
+    left: 47%;
+}
+
+/*home页面的css*/
+.main_head {
+
+}
+
+/*home页面head的css*/
+.head_bg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+}
+
+.head_logo {
+    font-size: 100%;
+    color: white;
+    margin-left: 2%;
+    margin-top: 1.1%;
+}
+
+.home_headline {
+    font-size: 150%;
+    color: white;
+}
+
+.head_msg {
+    position: absolute;
+    left: 88%;
+    width: 12%;
+    top: 60%;
+}
+
+/*home页面left的css*/
+.leftsidebar_box {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: #f2f2f2;
+}
+
+.leftsidebar_box dt {
+    background-color: #f9f9f9;
+    color: #333;
+    font-size: 14px;
+    position: relative;
+    line-height: 44px;
+    cursor: pointer;
+    border-bottom: 1px solid #dedede;
+    border-right: 1px solid #dedede;
+    padding-left: 40px;
+}
+
+.leftsidebar_box dt {
+    background-color: #f9f9f9;
+    color: #333;
+    font-size: 14px;
+    position: relative;
+    line-height: 44px;
+    cursor: pointer;
+    border-bottom: 1px solid #dedede;
+    border-right: 1px solid #dedede;
+    padding-left: 40px;
+}
+
+.leftsidebar_box dd {
+    display: none;
+    position: relative;
+    background-color: white;
+    padding-left: 65px;
+    border-bottom: 1px solid #dedede;
+    border-right: 1px solid #dedede;
+}
+
+.leftsidebar_box dd a {
+    color: #333;
+    line-height: 42px;
+    width: 100%;
+    height: 100%;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.leftsidebar_box dt img.icon1 {
+    display: none;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+}
+
+.leftsidebar_box dt img.icon3 {
+    display: none;
+    position: absolute;
+    top: 20px;
+    right: 12px;
+}
+
+.leftsidebar_box dt img.icon4 {
+    position: absolute;
+    top: 20px;
+    right: 12px;
+}
+
+.leftsidebar_box dd img.coin11 {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 40px;
+}
+
+.leftsidebar_box dd img.coin22 {
+    position: absolute;
+    top: 0;
+    left: 40px;
+}
+
+.leftsidebar_box dl dd:last-child {
+    padding-bottom: 10px;
+}
+
+.leftsidebar_box .left_line {
+    background-color: #f9f9f9;
+    color: #333;
+    font-size: 14px;
+    position: relative;
+    line-height: 44px;
+    cursor: pointer;
+    border-bottom: 1px solid #dedede;
+    border-right: 1px solid #dedede;
+    padding-left: 40px
+}
+
+.leftsidebar_box .left_line {
+    background-color: #f9f9f9;
+    color: #333;
+    font-size: 14px;
+    position: relative;
+    line-height: 44px;
+    cursor: pointer;
+    border-bottom: 1px solid #dedede;
+    border-right: 1px solid #dedede;
+    padding-left: 40px;
+}
+
+.leftsidebar_box .left_line img {
+    position: absolute;
+    top: 30%;
+    left: 20%;
+}
+
+.left_line span {
+    position: absolute;
+    top: 15%;
+    left: 35%;
+}
+
+.left_line {
+    height: 9%;
+}
+
+.leftsidebar_box .menu_chioce1 {
+    color: #106ea9;
+}
+
+.leftsidebar_box .menu_chioce2 {
+    color: #106ea9;
+}
+
+.menu_chioce {
+
+}
+
+.system_log {
+    margin: 0;
+}
+
+/*left.css end*/
+
+/*right.css*/
+#MainForm {
+    height: 100%;
+}
+
+.h2_btn {
+    position: absolute;
+    top: 2%;
+    right: 2%;
+}
+
+.warning_logo {
+    color: Gold;
+    font-size: 250%;
+}
+
+.warning_text {
+    position: absolute;
+    top: 30%;
+    left: 10%;
+    font-size: 16px;
+    font-weight: 200;
+    width:85%;
+}
+
+.warning_text2{
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    font-size: 16px;
+    font-weight: 200;
+    width:85%;
+}
+
+/*#part_alter_price_int {*/
+/*    width: 45%;*/
+/*}*/
+
+/*#part_alter_price_fra {*/
+/*    position: absolute;*/
+/*    width: 45%;*/
+/*    top: 46.6%;*/
+/*    right: 2.6%;*/
+/*}*/
+
+/*#part_alter_price_dot{*/
+/*    position:absolute;*/
+/*    top:49%;*/
+/*    left:47.5%;*/
+/*    font-size:40px;*/
+/*}*/
+/*right.css end*/
+
+/*affair_opt.css*/
+.affair_operation {
+    position: absolute;
+    width: 30%;
+    top: 20%;
+    left: 35%;
+}
+
+.affair_name_input {
+
+}
+
+.affair_num_input {
+    margin-top: 5%
+}
+
+.affair_option_input {
+    margin-top: 5%;
+}
+
+.affair_option_out {
+    left: 12%;
+}
+
+.affair_submit_button {
+    margin-top: 10%;
+    width: 100%;
+}
+
+.affair_refresh_button {
+    margin-top: 5%;
+    width: 100%;
+}
+
+/*affair_opt.css end*/
+
+/*change_password.css*/
+.change_operation {
+    position: absolute;
+    width: 30%;
+    top: 20%;
+    left: 35%;
+}
+
+.change_submit_button {
+    margin-top: 10%;
+    width: 100%;
+}
+
+/*change_password.css end*/
